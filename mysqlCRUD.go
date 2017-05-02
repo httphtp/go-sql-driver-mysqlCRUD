@@ -5,7 +5,7 @@ package main
 
 import ("fmt"
 	_ "github.com/go-sql-driver/mysql"
-         "database/sql"
+	"database/sql"
 	"time"
 )
 //reflect in database table of user
@@ -17,10 +17,10 @@ type User struct {
 }
 
 func addUser(user User,db *sql.DB) int{
-        insert_sql:="insert into user(UserName,Url,Age) value (?,?,?)"
+	insert_sql:="insert into user(UserName,Url,Age) value (?,?,?)"
 	stmt,err:=db.Prepare(insert_sql)
 	if err!=nil {
-            fmt.Println(err)
+		fmt.Println(err)
 		return 0
 	}
 	res,err:=stmt.Exec(user.userName,user.url,user.age)
@@ -51,10 +51,10 @@ func addUserInBatch(users []User,db *sql.DB,rollbackInArray int) int{
 	var i int
 	var res sql.Result
 	for _,user :=range users{
-	    	res,_=stmt.Exec(&user.userName,&user.url,&user.age)
+		res,_=stmt.Exec(&user.userName,&user.url,&user.age)
 		i++
 		if i==rollbackInArray {
-		   tx.Rollback()
+			tx.Rollback()
 			return 0
 		}
 	}
@@ -68,7 +68,7 @@ func findUserById(id int,db *sql.DB)(User){
 	select_sql:="select * from user where Id =?"
 	err:=db.QueryRow(select_sql,id).Scan(&user.id,&user.userName,&user.url,&user.age)
 	if err!=nil {
-		fmt.Println("findUserById err %v",err)
+		fmt.Printf("findUserById err %v\n",err)
 		//return empty user
 		return user
 	}
@@ -111,47 +111,47 @@ func updateUser(user User,db *sql.DB)  {
 }
 
 func testAddUser(db *sql.DB) {
-   	var user  =User{0,"Cock","http://blog.golang.org/cock",22}
+	var user  =User{0,"Cock","http://blog.golang.org/cock",22}
 	lastUserId:= addUser(user,db);
-	fmt.Println("addUser lastUserId= %d",lastUserId)
+	fmt.Printf("addUser lastUserId= %d\n",lastUserId)
 }
 
 func testAddUserInBatch(db *sql.DB)  {
-       //first add user no rollback
+	//first add user no rollback
 	var users=[]User{{0,"Cock","http://blog.golang.org/cock",22},{0,"Hickinbottom","http://blog.golang.org/hickinbottom",21},{0,"Willy","http://blog.golang.org/willy",22},{0,"Nutter","http://blog.golang.org/nutter",25},{0,"Pigg","http://blog.golang.org/Pigg",33}}
-   	lastId := addUserInBatch(users,db,0)
-   	fmt.Println("addUserInPatch rollInArray=0 totalAddUserSize=%d lastId=%d",len(users), lastId)
-       //second add user use rollback
+	lastId := addUserInBatch(users,db,0)
+	fmt.Printf("addUserInPatch rollInArray=0 totalAddUserSize=%d lastId=%d\n",len(users), lastId)
+	//second add user use rollback
 	users=nil
-   	users=append(users,User{0,"Jelly","http://blog.golang.org/jelly",35})
-   	users=append(users,User{0,"Stranger","http://blog.golang.org/stranger",18})
+	users=append(users,User{0,"Jelly","http://blog.golang.org/jelly",35})
+	users=append(users,User{0,"Stranger","http://blog.golang.org/stranger",18})
 	users=append(users,User{0,"Grave","http://blog.golang.org/grave",27})
-        lastId = addUserInBatch(users,db,2)
-	fmt.Println("addUserInPatch rollInArray=2 totalAddUserSize=%d lastId=%d",len(users), lastId)
+	lastId = addUserInBatch(users,db,2)
+	fmt.Printf("addUserInPatch rollInArray=2 totalAddUserSize=%d lastId=%d\n",len(users), lastId)
 }
 
 func testUpdateUser(db *sql.DB) {
-     var user=findUserById(1,db)
+	var user=findUserById(1,db)
 	if (User{}==user) {
-        	 fmt.Println("not find user where id=1")
+		fmt.Printf("not find user where id=1\n")
 		return
 	}
 
-        fmt.Println("before updateUser call findUserById:%v",user)
+	fmt.Printf("before updateUser call findUserById:%v\n",user)
 	timenow:=time.Now().Format("20060102150405")
 	user.userName="Crankshaw@"+timenow
 	user.url="http://blog.golang.org/crankshaw@"+timenow
 	updateUser(user,db);
 	user=findUserById(1,db)
-	fmt.Println("after updateUser:%v",user)
+	fmt.Printf("after updateUser:%v\n",user)
 }
 
 func testFindAllUser(db *sql.DB) {
 	users:=findAllUser(db)
-	//fmt.Println("%q",users)
-	fmt.Println("findAllUser usersLen=%d",len(users))
+	//fmt.Printf("%q\n",users)
+	fmt.Printf("findAllUser usersLen=%d\n",len(users))
 	for _,user:= range users {
-	  fmt.Println("%v",user)
+		fmt.Printf("%v\n",user)
 	}
 
 }
@@ -164,9 +164,9 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-      	defer db.Close()
+	defer db.Close()
 	testAddUser(db)
-        testAddUserInBatch(db)
+	testAddUserInBatch(db)
 	testUpdateUser(db)
-        testFindAllUser(db)
+	testFindAllUser(db)
 }
