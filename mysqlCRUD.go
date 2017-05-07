@@ -10,10 +10,10 @@ import ("fmt"
 )
 //reflect in database table of user
 type User struct {
-	id int
-	userName string
-	url string
-	age int
+	Id       int
+	UserName string
+	Url      string
+	Age      int
 }
 
 func addUser(user User,db *sql.DB) int{
@@ -23,7 +23,7 @@ func addUser(user User,db *sql.DB) int{
 		fmt.Println(err)
 		return 0
 	}
-	res,err:=stmt.Exec(user.userName,user.url,user.age)
+	res,err:=stmt.Exec(user.UserName,user.Url,user.Age)
 	if err!=nil {
 		fmt.Println(err)
 		return 0
@@ -51,7 +51,7 @@ func addUserInBatch(users []User,db *sql.DB,rollbackInArray int) int{
 	var i int
 	var res sql.Result
 	for _,user :=range users{
-		res,_=stmt.Exec(&user.userName,&user.url,&user.age)
+		res,_=stmt.Exec(&user.UserName,&user.Url,&user.Age)
 		i++
 		if i==rollbackInArray {
 			tx.Rollback()
@@ -66,7 +66,7 @@ func addUserInBatch(users []User,db *sql.DB,rollbackInArray int) int{
 func findUserById(id int,db *sql.DB)(User){
 	var user User
 	select_sql:="select * from user where Id =?"
-	err:=db.QueryRow(select_sql,id).Scan(&user.id,&user.userName,&user.url,&user.age)
+	err:=db.QueryRow(select_sql,id).Scan(&user.Id,&user.UserName,&user.Url,&user.Age)
 	if err!=nil {
 		fmt.Printf("findUserById err %v\n",err)
 		//return empty user
@@ -87,7 +87,7 @@ func findAllUser(db *sql.DB)[]User {
 		return nil
 	}
 	for rows.Next(){
-		if err := rows.Scan(&user.id, &user.userName, &user.url, &user.age);err!=nil {
+		if err := rows.Scan(&user.Id, &user.UserName, &user.Url, &user.Age);err!=nil {
 			fmt.Println(err)
 			return nil
 		}
@@ -103,7 +103,7 @@ func updateUser(user User,db *sql.DB)  {
 		fmt.Println(err)
 		return
 	}
-	_, err = ustmt.Exec(user.userName,user.url,user.id)
+	_, err = ustmt.Exec(user.UserName,user.Url,user.Id)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -133,14 +133,14 @@ func testAddUserInBatch(db *sql.DB)  {
 func testUpdateUser(db *sql.DB) {
 	var user=findUserById(1,db)
 	if (User{}==user) {
-		fmt.Printf("not find user where id=1\n")
+		fmt.Printf("not find user where Id=1\n")
 		return
 	}
 
 	fmt.Printf("before updateUser call findUserById:%v\n",user)
 	timenow:=time.Now().Format("20060102150405")
-	user.userName="Crankshaw@"+timenow
-	user.url="http://blog.golang.org/crankshaw@"+timenow
+	user.UserName ="Crankshaw@"+timenow
+	user.Url ="http://blog.golang.org/crankshaw@"+timenow
 	updateUser(user,db);
 	user=findUserById(1,db)
 	fmt.Printf("after updateUser:%v\n",user)
